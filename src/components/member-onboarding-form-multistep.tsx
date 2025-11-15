@@ -106,7 +106,7 @@ export function MemberOnboardingForm({
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -201,12 +201,11 @@ export function MemberOnboardingForm({
       form.setValue(
         fieldName,
         current.filter((v) => v !== value),
-        { shouldDirty: true, shouldValidate: true }
+        { shouldDirty: true }
       );
     } else {
       form.setValue(fieldName, [...current, value], {
         shouldDirty: true,
-        shouldValidate: true,
       });
     }
   };
