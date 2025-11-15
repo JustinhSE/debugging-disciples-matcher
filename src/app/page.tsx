@@ -15,7 +15,7 @@ export default function Home() {
         </h1>
         
         <p className="text-xl text-[#a1a1aa] max-w-lg">
-          Connect with other Christian developers and find your accountability match.
+          Connect with other Christian developers and find your match.
         </p>
         
         <p className="text-base text-[#808080]">
