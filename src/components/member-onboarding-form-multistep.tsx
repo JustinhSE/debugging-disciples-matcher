@@ -135,58 +135,60 @@ export function MemberOnboardingForm({
   // Use local submitting state, but also check parent state
   const isSubmitting = localSubmitting || parentIsSubmitting;
 
+  // Watch all fields to trigger re-renders when they change
+  const allValues = form.watch();
+
   const onSubmit = (values: OnboardingFormValues) => {
     setLocalSubmitting(true);
     onSubmitMember(values);
   };
 
-  const canGoNext = () => {
-    const fieldsToValidate: (keyof OnboardingFormValues)[] = [];
-    
+  const isStepValid = React.useMemo(() => {
     switch (currentStep) {
       case 1:
-        fieldsToValidate.push("firstName", "lastName");
-        break;
+        return (
+          allValues.firstName?.trim() !== "" &&
+          allValues.lastName?.trim() !== ""
+        );
       case 2:
-        fieldsToValidate.push("stage", "major", "institution", "linkedinUrl");
-        break;
+        return (
+          allValues.stage &&
+          allValues.major?.trim() !== "" &&
+          allValues.institution?.trim() !== "" &&
+          allValues.linkedinUrl?.trim() !== ""
+        );
       case 3:
-        fieldsToValidate.push("faithSeason");
-        break;
+        return allValues.faithSeason !== undefined && allValues.faithSeason !== "";
       case 4:
-        fieldsToValidate.push("techInterests", "careerGoals");
-        break;
+        return (
+          Array.isArray(allValues.techInterests) &&
+          allValues.techInterests.length > 0 &&
+          Array.isArray(allValues.careerGoals) &&
+          allValues.careerGoals.length > 0
+        );
       case 5:
-        fieldsToValidate.push("personalityWords", "habits");
-        break;
+        return (
+          allValues.personalityWords?.trim() !== "" &&
+          Array.isArray(allValues.habits) &&
+          allValues.habits.length > 0
+        );
       case 6:
-        fieldsToValidate.push("accountabilityLevel", "matchPreference");
-        break;
+        return (
+          allValues.accountabilityLevel !== undefined &&
+          allValues.accountabilityLevel !== "" &&
+          allValues.matchPreference !== undefined &&
+          allValues.matchPreference !== ""
+        );
+      default:
+        return false;
     }
-
-    return fieldsToValidate.every((field) => {
-      const value = form.getValues(field);
-      const hasError = !!form.formState.errors[field];
-      
-      if (hasError) return false;
-      
-      // For string fields
-      if (typeof value === "string") {
-        return value !== "";
-      }
-      
-      // For array fields
-      if (Array.isArray(value)) {
-        return value.length > 0;
-      }
-      
-      // For other fields
-      return value !== undefined && value !== null;
-    });
-  };
+  }, [currentStep, allValues]);
 
   const handleNext = () => {
-    if (canGoNext() && currentStep < totalSteps) {
+    if (!isStepValid) {
+      return;
+    }
+    if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -693,7 +695,7 @@ export function MemberOnboardingForm({
           {currentStep === totalSteps ? (
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isStepValid}
               className="ml-auto"
             >
               {isSubmitting ? "Submitting..." : "Complete Profile"}
@@ -702,7 +704,7 @@ export function MemberOnboardingForm({
             <Button
               type="button"
               onClick={handleNext}
-              disabled={!canGoNext()}
+              disabled={!isStepValid}
               className="ml-auto flex items-center gap-2"
             >
               Next
