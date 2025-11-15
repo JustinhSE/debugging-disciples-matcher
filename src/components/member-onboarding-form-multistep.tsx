@@ -99,9 +99,10 @@ const STEPS = [
 
 export function MemberOnboardingForm({
   onSubmitMember,
-  isSubmitting,
+  isSubmitting: parentIsSubmitting,
 }: MemberOnboardingFormProps) {
   const [currentStep, setCurrentStep] = React.useState(1);
+  const [localSubmitting, setLocalSubmitting] = React.useState(false);
   const totalSteps = STEPS.length;
 
   const form = useForm({
@@ -131,10 +132,11 @@ export function MemberOnboardingForm({
     },
   });
 
-  // Watch all fields to trigger re-render when form changes
-  const watchedValues = form.watch();
+  // Use local submitting state, but also check parent state
+  const isSubmitting = localSubmitting || parentIsSubmitting;
 
   const onSubmit = (values: OnboardingFormValues) => {
+    setLocalSubmitting(true);
     onSubmitMember(values);
   };
 
