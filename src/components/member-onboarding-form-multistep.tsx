@@ -131,6 +131,9 @@ export function MemberOnboardingForm({
     },
   });
 
+  // Watch all fields to trigger re-render when form changes
+  const watchedValues = form.watch();
+
   const onSubmit = (values: OnboardingFormValues) => {
     onSubmitMember(values);
   };
@@ -198,11 +201,12 @@ export function MemberOnboardingForm({
       form.setValue(
         fieldName,
         current.filter((v) => v !== value),
-        { shouldDirty: true }
+        { shouldDirty: true, shouldValidate: true }
       );
     } else {
       form.setValue(fieldName, [...current, value], {
         shouldDirty: true,
+        shouldValidate: true,
       });
     }
   };
