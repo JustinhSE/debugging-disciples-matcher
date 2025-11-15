@@ -159,12 +159,25 @@ export function MemberOnboardingForm({
         break;
     }
 
-    return fieldsToValidate.every(
-      (field) =>
-        !form.formState.errors[field] &&
-        form.getValues(field) !== "" &&
-        form.getValues(field) !== undefined
-    );
+    return fieldsToValidate.every((field) => {
+      const value = form.getValues(field);
+      const hasError = !!form.formState.errors[field];
+      
+      if (hasError) return false;
+      
+      // For string fields
+      if (typeof value === "string") {
+        return value !== "";
+      }
+      
+      // For array fields
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      
+      // For other fields
+      return value !== undefined && value !== null;
+    });
   };
 
   const handleNext = () => {
