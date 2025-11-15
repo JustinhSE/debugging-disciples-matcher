@@ -1,38 +1,55 @@
 // src/lib/db.ts
 import { MongoClient, Db } from "mongodb";
 
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGODB_URI || "";
 const dbName = process.env.MONGODB_DB || "debugging_disciples";
 
 if (!uri) {
-  throw new Error("Please set the MONGODB_URI environment variable.");
+  throw new Error("MONGODB_URI environment variable is not set");
 }
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-let client: MongoClient;
-const clientPromise: Promise<MongoClient> = (global._mongoClientPromise || (() => {
+async function createConnection(mongoUri: string): Promise<MongoClient> {
   try {
-    client = new MongoClient(uri, {
+    const client = new MongoClient(mongoUri, {
       maxPoolSize: 10,
       minPoolSize: 2,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     });
-    global._mongoClientPromise = client.connect();
-    return global._mongoClientPromise;
+    
+    await client.connect();
+    console.log("✓ Connected to MongoDB");
+    return client;
   } catch (error) {
-    console.error("Failed to create MongoDB client:", error);
+    console.error("✗ Failed to connect to MongoDB:", error);
     throw error;
   }
-})()) as Promise<MongoClient>;
+}
+
+function getClientPromise(): Promise<MongoClient> {
+  if (!global._mongoClientPromise) {
+    global._mongoClientPromise = createConnection(uri);
+  }
+  return global._mongoClientPromise;
+}
 
 export async function getDb(): Promise<Db> {
   try {
-    const client = await clientPromise;
-    return client.db(dbName);
+    const client = await getClientPromise();
+    const db = client.db(dbName);
+    
+    // Verify connection with a simple ping
+    await db.admin().ping();
+    
+    return db;
   } catch (error) {
-    console.error("Failed to connect to MongoDB:", error);
-    throw new Error("Database connection failed");
+    console.error("✗ Database error:", error);
+    throw new Error(
+      `Database connection failed: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
 }

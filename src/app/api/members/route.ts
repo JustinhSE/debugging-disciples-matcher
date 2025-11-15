@@ -53,20 +53,29 @@ function timezoneToOffsetHours(tz: string): number {
 
 export async function POST(req: Request) {
   try {
+    console.log("📝 POST /api/members - Received request");
+    
     const json = await req.json();
+    console.log("✓ Parsed JSON");
+    
     const parsed = onboardingSchema.safeParse(json);
 
     if (!parsed.success) {
+      console.log("✗ Validation failed:", parsed.error.flatten());
       return NextResponse.json(
         { error: "Invalid payload", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
 
+    console.log("✓ Data validated");
+
     const data = parsed.data;
     const timezoneOffsetHours = timezoneToOffsetHours(data.timezone);
 
+    console.log("🔗 Connecting to database...");
     const db = await getDb();
+    console.log("✓ Connected to database");
 
     const memberDoc = {
       firstName: data.firstName,
@@ -103,7 +112,9 @@ export async function POST(req: Request) {
       createdAt: new Date(),
     };
 
+    console.log("💾 Inserting member document...");
     const result = await db.collection("members").insertOne(memberDoc);
+    console.log("✓ Member inserted with ID:", result.insertedId.toString());
 
     return NextResponse.json(
       { 
@@ -116,9 +127,15 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (err) {
-    console.error("Error saving member:", err);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("✗ Error saving member:", errorMessage);
+    console.error("Full error:", err);
+    
     return NextResponse.json(
-      { error: "Internal server error" },
+      { 
+        error: "Internal server error",
+        details: errorMessage 
+      },
       { status: 500 }
     );
   }
