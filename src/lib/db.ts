@@ -2,30 +2,37 @@
 import { MongoClient, Db } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
-const dbName = process.env.MONGODB_DB;
+const dbName = process.env.MONGODB_DB || "debugging_disciples";
 
 if (!uri) {
   throw new Error("Please set the MONGODB_URI environment variable.");
 }
-if (!dbName) {
-  throw new Error("Please set the MONGODB_DB environment variable.");
-}
-
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-if (!global._mongoClientPromise) {
-  client = new MongoClient(uri);
-  global._mongoClientPromise = client.connect();
-}
-
-clientPromise = global._mongoClientPromise;
+let client: MongoClient;
+const clientPromise: Promise<MongoClient> = (global._mongoClientPromise || (() => {
+  try {
+    client = new MongoClient(uri, {
+      maxPoolSize: 10,
+      minPoolSize: 2,
+    });
+    global._mongoClientPromise = client.connect();
+    return global._mongoClientPromise;
+  } catch (error) {
+    console.error("Failed to create MongoDB client:", error);
+    throw error;
+  }
+})()) as Promise<MongoClient>;
 
 export async function getDb(): Promise<Db> {
-  const client = await clientPromise;
-  return client.db(dbName);
+  try {
+    const client = await clientPromise;
+    return client.db(dbName);
+  } catch (error) {
+    console.error("Failed to connect to MongoDB:", error);
+    throw new Error("Database connection failed");
+  }
 }
