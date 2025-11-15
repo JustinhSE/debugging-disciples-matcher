@@ -66,7 +66,7 @@ export default function OnboardingPage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-12">
           <h1 className="text-3xl font-bold text-white mb-2">Create Your Profile</h1>
-          <p className="text-[#a1a1aa]">Join the Debugging Disciples community and find your match</p>
+          <p className="text-[#a1a1aa]">Join the Debugging Disciples community and find your accountability match</p>
         </div>
         <MemberOnboardingForm 
           onSubmitMember={handleSubmitMember} 
