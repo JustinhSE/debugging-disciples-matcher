@@ -158,7 +158,7 @@ export function MemberOnboardingForm({
           allValues.linkedinUrl?.trim() !== ""
         );
       case 3:
-        return allValues.faithSeason !== undefined && allValues.faithSeason !== "";
+        return allValues.faithSeason !== undefined;
       case 4:
         return (
           Array.isArray(allValues.techInterests) &&
@@ -175,9 +175,7 @@ export function MemberOnboardingForm({
       case 6:
         return (
           allValues.accountabilityLevel !== undefined &&
-          allValues.accountabilityLevel !== "" &&
-          allValues.matchPreference !== undefined &&
-          allValues.matchPreference !== ""
+          allValues.matchPreference !== undefined
         );
       default:
         return false;
