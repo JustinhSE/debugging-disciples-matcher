@@ -143,6 +143,17 @@ export function MemberOnboardingForm({
     onSubmitMember(values);
   };
 
+  const handleManualSubmit = () => {
+    // Validate all fields before submission
+    form.trigger().then((isValid) => {
+      if (isValid) {
+        const values = form.getValues() as OnboardingFormValues;
+        setLocalSubmitting(true);
+        onSubmitMember(values);
+      }
+    });
+  };
+
   const isStepValid = React.useMemo(() => {
     switch (currentStep) {
       case 1:
@@ -214,7 +225,7 @@ export function MemberOnboardingForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl mx-auto">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-8 max-w-2xl mx-auto">
         {/* Step Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -692,7 +703,8 @@ export function MemberOnboardingForm({
 
           {currentStep === totalSteps ? (
             <Button
-              type="submit"
+              type="button"
+              onClick={handleManualSubmit}
               disabled={isSubmitting || !isStepValid}
               className="ml-auto"
             >
