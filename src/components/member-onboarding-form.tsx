@@ -31,6 +31,9 @@ import { Stage, FaithSeason, MatchPreference, AccountabilityLevel, Pod, TimeSlot
 // ---------- Zod Schema ----------
 
 const formSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  
   stage: z.enum(["college", "new_grad", "transfer", "gap_year", "other"]),
   major: z.string().min(2),
   institution: z.string().min(2),
@@ -93,6 +96,8 @@ export function MemberOnboardingForm({
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       stage: "college",
       major: "",
       institution: "",
@@ -140,6 +145,41 @@ export function MemberOnboardingForm({
         className="space-y-8 max-w-2xl mx-auto"
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        {/* Identity */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Your Name</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
         {/* Identity */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">About You</h2>
@@ -533,7 +573,7 @@ export function MemberOnboardingForm({
                       className="flex items-center space-x-2 text-sm"
                     >
                       <Checkbox
-                        checked={form.getValues("pods").includes(value)}
+                        checked={(form.getValues("pods") || []).includes(value)}
                         onCheckedChange={() => toggleInArray("pods", value)}
                       />
                       <span>{label}</span>

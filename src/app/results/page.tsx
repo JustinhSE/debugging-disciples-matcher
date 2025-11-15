@@ -1,9 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Heart, Users, Briefcase } from "lucide-react";
 
 interface MatchMember {
   _id: string;
@@ -18,9 +20,6 @@ interface MatchMember {
 }
 
 export default function ResultsPage() {
-  const searchParams = useSearchParams();
-  const memberId = searchParams.get("memberId");
-  
   const [matches, setMatches] = React.useState<MatchMember[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -28,13 +27,18 @@ export default function ResultsPage() {
 
   React.useEffect(() => {
     const fetchMatches = async () => {
-      if (!memberId) {
-        setError("No member ID provided");
-        setLoading(false);
-        return;
-      }
-
       try {
+        // Get member ID from session storage
+        const memberId = typeof window !== "undefined" 
+          ? sessionStorage.getItem("memberId")
+          : null;
+
+        if (!memberId) {
+          setError("No member session found. Please complete onboarding.");
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch(`/api/members/matches?memberId=${memberId}`);
         if (!res.ok) {
           throw new Error("Failed to fetch matches");
@@ -52,14 +56,14 @@ export default function ResultsPage() {
     };
 
     fetchMatches();
-  }, [memberId]);
+  }, []);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-[#000000]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Finding Your Matches...</h1>
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <h1 className="text-2xl font-bold mb-4 text-white">Finding Your Matches...</h1>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#06b6d4] mx-auto"></div>
         </div>
       </div>
     );
@@ -67,19 +71,19 @@ export default function ResultsPage() {
 
   if (memberCount < 5) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black p-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#000000] p-4">
         <div className="max-w-2xl w-full text-center space-y-6">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-white">
             Profile Saved! 🎉
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
+          <p className="text-lg text-[#a1a1aa]">
             We&apos;re building the community! Currently {memberCount} member{memberCount !== 1 ? "s" : ""} have joined.
           </p>
-          <p className="text-base text-slate-500 dark:text-slate-400">
+          <p className="text-base text-[#808080]">
             We&apos;ll show you matches once we reach 5 members. Check back soon!
           </p>
           <Link href="/">
-            <Button className="mt-8">Back to Home</Button>
+            <Button className="mt-8 bg-[#06b6d4] text-[#000000] hover:bg-[#06b6d4]/80">Back to Home</Button>
           </Link>
         </div>
       </div>
@@ -88,12 +92,12 @@ export default function ResultsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black p-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#000000] p-4">
         <div className="max-w-2xl w-full text-center space-y-6">
-          <h1 className="text-3xl font-bold text-red-600">Error</h1>
-          <p className="text-lg text-slate-600 dark:text-slate-300">{error}</p>
+          <h1 className="text-3xl font-bold text-red-500">Error</h1>
+          <p className="text-lg text-[#a1a1aa]">{error}</p>
           <Link href="/">
-            <Button className="mt-8">Back to Home</Button>
+            <Button className="mt-8 bg-[#06b6d4] text-[#000000] hover:bg-[#06b6d4]/80">Back to Home</Button>
           </Link>
         </div>
       </div>
@@ -101,115 +105,139 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black py-12 px-4">
+    <div className="min-h-screen bg-[#000000] py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-            Your Top Matches 🤝
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Welcome to the Community! 🤝
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
-            Here are your 3 most compatible accountability partners based on your profile.
+          <p className="text-lg text-[#a1a1aa] mb-4">
+            We found {matches.length} excellent matches based on your profile.
           </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-[#a1a1aa]">
+            <Heart size={16} className="text-[#06b6d4]" />
+            <span>Check out your personalized matches below</span>
+          </div>
         </div>
 
-        {matches.length === 0 ? (
-          <div className="text-center p-8 bg-white dark:bg-slate-900 rounded-lg">
-            <p className="text-slate-600 dark:text-slate-300">
-              No matches found. Please try adjusting your preferences.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {matches.map((match, index) => (
-              <div
-                key={match._id}
-                className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-8 border-l-4 border-blue-600"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <div className="text-sm font-semibold text-blue-600 mb-2">
-                      Match #{index + 1}
+        <div className="grid gap-6 mb-8">
+          {matches.map((match, index) => (
+            <Card key={match._id} className="overflow-hidden bg-[#0a0a0a] border-[#27272a]">
+              <CardHeader className="bg-[#18181b] border-b border-[#27272a]">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#06b6d4] to-[#8b5cf6] text-white flex items-center justify-center font-bold text-lg">
+                      {index + 1}
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {match.stage === "college"
-                        ? "College Student"
-                        : match.stage === "new_grad"
-                          ? "New Grad / Early Career"
-                          : match.stage}
-                    </h2>
+                    <div>
+                      <CardTitle className="text-xl text-white">
+                        {match.stage === "college"
+                          ? "College Student"
+                          : match.stage === "new_grad"
+                            ? "New Grad / Early Career"
+                            : match.stage}
+                      </CardTitle>
+                      <CardDescription className="text-[#a1a1aa]">
+                        {match.major} • {match.institution}
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-blue-600">
-                    {Math.round(match.matchScore * 100)}%
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                      Education
-                    </p>
-                    <p className="text-slate-900 dark:text-white mt-1">{match.major}</p>
-                    <p className="text-slate-600 dark:text-slate-300 text-sm">
-                      {match.institution}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                      Faith Journey
-                    </p>
-                    <p className="text-slate-900 dark:text-white mt-1">
-                      {match.faithSeason.replace(/_/g, " ")}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                      Accountability Level
-                    </p>
-                    <p className="text-slate-900 dark:text-white mt-1">
-                      {match.accountabilityLevel}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                      Match Preference
-                    </p>
-                    <p className="text-slate-900 dark:text-white mt-1">
-                      {match.matchPreference}
-                    </p>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-[#06b6d4]">
+                      {Math.round(match.matchScore * 100)}%
+                    </div>
+                    <div className="text-xs text-[#a1a1aa]">compatibility</div>
                   </div>
                 </div>
-
-                {match.personalityWords && match.personalityWords.length > 0 && (
-                  <div className="mt-6">
-                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
-                      Personality
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {match.personalityWords.map((word, i) => (
-                        <span
-                          key={i}
-                          className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 px-3 py-1 rounded-full text-sm"
-                        >
-                          {word}
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2 text-white">
+                      <Heart size={16} className="text-[#06b6d4]" />
+                      Profile Highlights
+                    </h4>
+                    <ul className="text-sm text-[#a1a1aa] space-y-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-[#06b6d4]">•</span>
+                        <span>
+                          Faith Journey: <strong>{match.faithSeason.replace(/_/g, " ")}</strong>
                         </span>
-                      ))}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-[#06b6d4]">•</span>
+                        <span>
+                          Accountability Level: <strong>{match.accountabilityLevel}</strong>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-[#06b6d4]">•</span>
+                        <span>
+                          Match Preference: <strong>{match.matchPreference}</strong>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="border-t border-[#27272a] pt-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <h5 className="font-medium mb-2 flex items-center gap-2 text-white">
+                          <Users size={16} className="text-[#8b5cf6]" />
+                          Personality
+                        </h5>
+                        <div className="flex flex-wrap gap-1">
+                          {match.personalityWords.slice(0, 3).map((word) => (
+                            <Badge key={word} className="bg-[#18181b] text-[#06b6d4] border border-[#06b6d4] text-xs">
+                              {word}
+                            </Badge>
+                          ))}
+                          {match.personalityWords.length > 3 && (
+                            <Badge className="bg-[#27272a] text-[#a1a1aa] border border-[#27272a] text-xs">
+                              +{match.personalityWords.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <h5 className="font-medium mb-2 flex items-center gap-2 text-white">
+                          <Briefcase size={16} className="text-[#3b82f6]" />
+                          Mentorship
+                        </h5>
+                        <Badge className="bg-[#18181b] text-[#3b82f6] border border-[#3b82f6]">
+                          {match.matchPreference === "mentor"
+                            ? "Offers mentorship"
+                            : match.matchPreference === "mentee"
+                              ? "Seeks mentorship"
+                              : match.matchPreference === "peer"
+                                ? "Peer mentorship"
+                                : "Flexible"}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-        <div className="mt-12 text-center">
-          <Link href="/">
-            <Button variant="outline" className="mt-8">
-              Back to Home
-            </Button>
-          </Link>
+        <div className="text-center space-y-4">
+          <Card className="p-6 bg-linear-to-r from-[#06b6d4]/10 to-[#8b5cf6]/10 border border-[#06b6d4]/30">
+            <h3 className="font-semibold text-white mb-2">Next Steps</h3>
+            <p className="text-sm text-[#a1a1aa] mb-4">
+              You&apos;re all set! Your matches have been identified. 
+              Check back as the community grows for more connection opportunities.
+            </p>
+            <div className="flex justify-center gap-4">
+              <Link href="/">
+                <Button variant="outline" className="border-[#06b6d4] text-[#06b6d4] hover:bg-[#06b6d4]/10">
+                  <ArrowLeft className="mr-2" size={16} />
+                  Return Home
+                </Button>
+              </Link>
+            </div>
+          </Card>
         </div>
       </div>
     </div>

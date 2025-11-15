@@ -3,6 +3,9 @@ import { getDb } from "@/lib/db";
 import { z } from "zod";
 
 const onboardingSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  
   stage: z.string(),
   major: z.string(),
   institution: z.string(),
@@ -66,6 +69,9 @@ export async function POST(req: Request) {
     const db = await getDb();
 
     const memberDoc = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      
       stage: data.stage,
       major: data.major,
       institution: data.institution,

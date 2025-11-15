@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { MemberOnboardingForm, type OnboardingFormValues } from "@/components/member-onboarding-form";
+import { MemberOnboardingForm, type OnboardingFormValues } from "@/components/member-onboarding-form-multistep";
 import { toast } from "sonner";
 
 export default function OnboardingPage() {
@@ -47,8 +47,11 @@ export default function OnboardingPage() {
       
       toast.success("Welcome! Your profile has been saved.");
 
-      // Redirect to results page with member ID
-      router.push(`/results?memberId=${json.data._id || json.data.id}`); 
+      // Store member ID in session storage and redirect to results
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("memberId", json.data._id || json.data.id);
+      }
+      router.push("/results"); 
 
     } catch (err) {
       console.error(err);
@@ -59,11 +62,17 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="container py-12">
-      <MemberOnboardingForm 
-        onSubmitMember={handleSubmitMember} 
-        isSubmitting={isSubmitting}
-      />
+    <div className="min-h-screen bg-[#000000] py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-12">
+          <h1 className="text-3xl font-bold text-white mb-2">Create Your Profile</h1>
+          <p className="text-[#a1a1aa]">Join the Debugging Disciples community and find your accountability match</p>
+        </div>
+        <MemberOnboardingForm 
+          onSubmitMember={handleSubmitMember} 
+          isSubmitting={isSubmitting}
+        />
+      </div>
     </div>
   );
 }
