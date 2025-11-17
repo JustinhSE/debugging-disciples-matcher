@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, Users, Briefcase, Slack } from "lucide-react";
+import { ArrowLeft, Heart, Users, Briefcase, Slack, Linkedin } from "lucide-react";
 
 interface MatchMember {
   _id: string;
@@ -14,6 +14,7 @@ interface MatchMember {
   stage: string;
   major: string;
   institution: string;
+  linkedinUrl: string;
   faithSeason: string;
   accountabilityLevel: string;
   matchPreference: string;
@@ -155,13 +156,25 @@ export default function ResultsPage() {
                       {Math.round(match.matchScore * 100)}%
                     </div>
                     <div className="text-xs text-[#a1a1aa] mb-3">compatibility</div>
-                    {match.profile && (
+                    {match.profile && match.profile.trim() ? (
                       <a href={match.profile} target="_blank" rel="noopener noreferrer">
                         <Button className="bg-[#0ACE6E] hover:bg-[#0ACE6E]/80 text-white gap-2 h-8 text-xs">
                           <Slack size={14} />
                           Connect
                         </Button>
                       </a>
+                    ) : match.linkedinUrl ? (
+                      <a href={match.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                        <Button className="bg-[#0A66C2] hover:bg-[#0A66C2]/80 text-white gap-2 h-8 text-xs">
+                          <Linkedin size={14} />
+                          Connect
+                        </Button>
+                      </a>
+                    ) : (
+                      <Button disabled className="bg-[#27272a] text-[#808080] gap-2 h-8 text-xs cursor-not-allowed">
+                        <Slack size={14} />
+                        Connect
+                      </Button>
                     )}
                   </div>
                 </div>
