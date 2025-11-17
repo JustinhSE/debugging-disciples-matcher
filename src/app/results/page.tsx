@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, Users, Briefcase } from "lucide-react";
+import { ArrowLeft, Heart, Users, Briefcase, Slack } from "lucide-react";
 
 interface MatchMember {
   _id: string;
@@ -20,6 +20,7 @@ interface MatchMember {
   personalityWords: string[];
   hobbiesRaw: string[];
   sportsTheyWatch: string[];
+  profile: string;
   matchScore: number;
 }
 
@@ -153,7 +154,15 @@ export default function ResultsPage() {
                     <div className="text-3xl font-bold text-[#06b6d4]">
                       {Math.round(match.matchScore * 100)}%
                     </div>
-                    <div className="text-xs text-[#a1a1aa]">compatibility</div>
+                    <div className="text-xs text-[#a1a1aa] mb-3">compatibility</div>
+                    {match.profile && (
+                      <a href={match.profile} target="_blank" rel="noopener noreferrer">
+                        <Button className="bg-[#0ACE6E] hover:bg-[#0ACE6E]/80 text-white gap-2 h-8 text-xs">
+                          <Slack size={14} />
+                          Connect
+                        </Button>
+                      </a>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -180,14 +189,14 @@ export default function ResultsPage() {
                       <li className="flex items-start gap-2">
                         <span className="text-[#06b6d4]">•</span>
                         <span>
-                          Match Preference: <strong>{match.matchPreference}</strong>
+                          Match Preference: <strong>{match.matchPreference === "no_preference" ? "Open to Any" : match.matchPreference}</strong>
                         </span>
                       </li>
                     </ul>
                   </div>
 
                   <div className="border-t border-[#27272a] pt-4">
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid md:grid-cols-3 gap-4">
                       <div>
                         <h5 className="font-medium mb-2 flex items-center gap-2 text-white">
                           <Users size={16} className="text-[#8b5cf6]" />
@@ -208,43 +217,47 @@ export default function ResultsPage() {
                       </div>
                       <div>
                         <h5 className="font-medium mb-2 flex items-center gap-2 text-white">
-                          <Briefcase size={16} className="text-[#3b82f6]" />
-                          Hobbies & Sports
+                          🎮 Hobbies
                         </h5>
-                        <div className="space-y-2">
-                          {match.hobbiesRaw.length > 0 && (
-                            <div>
-                              <p className="text-xs text-[#808080] mb-1">Hobbies:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {match.hobbiesRaw.slice(0, 2).map((hobby) => (
-                                  <Badge key={hobby} className="bg-[#18181b] text-[#3b82f6] border border-[#3b82f6] text-xs">
-                                    {hobby}
-                                  </Badge>
-                                ))}
-                                {match.hobbiesRaw.length > 2 && (
-                                  <Badge className="bg-[#27272a] text-[#a1a1aa] border border-[#27272a] text-xs">
-                                    +{match.hobbiesRaw.length - 2} more
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
+                        <div className="flex flex-wrap gap-1">
+                          {match.hobbiesRaw.length > 0 ? (
+                            <>
+                              {match.hobbiesRaw.slice(0, 3).map((hobby) => (
+                                <Badge key={hobby} className="bg-[#18181b] text-[#3b82f6] border border-[#3b82f6] text-xs">
+                                  {hobby}
+                                </Badge>
+                              ))}
+                              {match.hobbiesRaw.length > 3 && (
+                                <Badge className="bg-[#27272a] text-[#a1a1aa] border border-[#27272a] text-xs">
+                                  +{match.hobbiesRaw.length - 3} more
+                                </Badge>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-xs text-[#808080]">Not specified</span>
                           )}
-                          {match.sportsTheyWatch.length > 0 && (
-                            <div>
-                              <p className="text-xs text-[#808080] mb-1">Sports:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {match.sportsTheyWatch.slice(0, 2).map((sport) => (
-                                  <Badge key={sport} className="bg-[#18181b] text-[#3b82f6] border border-[#3b82f6] text-xs">
-                                    {sport}
-                                  </Badge>
-                                ))}
-                                {match.sportsTheyWatch.length > 2 && (
-                                  <Badge className="bg-[#27272a] text-[#a1a1aa] border border-[#27272a] text-xs">
-                                    +{match.sportsTheyWatch.length - 2} more
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h5 className="font-medium mb-2 flex items-center gap-2 text-white">
+                          🏆 Sports
+                        </h5>
+                        <div className="flex flex-wrap gap-1">
+                          {match.sportsTheyWatch.length > 0 ? (
+                            <>
+                              {match.sportsTheyWatch.slice(0, 3).map((sport) => (
+                                <Badge key={sport} className="bg-[#18181b] text-[#ec4899] border border-[#ec4899] text-xs">
+                                  {sport}
+                                </Badge>
+                              ))}
+                              {match.sportsTheyWatch.length > 3 && (
+                                <Badge className="bg-[#27272a] text-[#a1a1aa] border border-[#27272a] text-xs">
+                                  +{match.sportsTheyWatch.length - 3} more
+                                </Badge>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-xs text-[#808080]">Not specified</span>
                           )}
                         </div>
                       </div>
