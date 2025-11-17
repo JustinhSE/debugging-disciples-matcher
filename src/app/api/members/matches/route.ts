@@ -75,12 +75,14 @@ export async function GET(request: NextRequest) {
         stage: match.stage,
         major: match.major,
         institution: match.institution,
+        linkedinUrl: match.linkedinUrl,
         faithSeason: match.faithSeason,
         accountabilityLevel: match.accountabilityLevel,
         matchPreference: match.matchPreference,
         personalityWords: match.personalityWords || [],
         hobbiesRaw: match.hobbiesRaw || [],
         sportsTheyWatch: match.sportsTheyWatch || [],
+        profile: match.profile || "",
         matchScore: match.matchScore,
       }));
 
