@@ -79,6 +79,25 @@ export async function POST(req: Request) {
     const db = await getDb();
     console.log("✓ Connected to database");
 
+    // Fetch userid from user_mappings based on first and last name (case-insensitive)
+    let profile = data.profile;
+    try {
+      const userMapping = await db.collection("user_mappings").findOne({
+        firstName: { $regex: `^${data.firstName}$`, $options: "i" },
+        lastName: { $regex: `^${data.lastName}$`, $options: "i" },
+      });
+
+      if (userMapping && userMapping.userid) {
+        profile = `https://debuggingdisciples.slack.com/team/${userMapping.userid}`;
+        console.log(`✓ Found userid: ${userMapping.userid}`);
+      } else {
+        console.warn(`⚠ No userid found for ${data.firstName} ${data.lastName}`);
+      }
+    } catch (err) {
+      console.warn(`⚠ Error looking up userid:`, err);
+      // Continue without userid - profile will remain as provided
+    }
+
     const memberDoc = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -111,7 +130,7 @@ export async function POST(req: Request) {
       hobbies: data.hobbiesRaw,
       sportsTheyWatch: data.sportsTheyWatch,
       
-      profile: data.profile,
+      profile: profile,
 
       createdAt: new Date(),
     };
@@ -134,6 +153,59 @@ export async function POST(req: Request) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     console.error("✗ Error saving member:", errorMessage);
     console.error("Full error:", err);
+    
+    return NextResponse.json(
+      { 
+        error: "Internal server error",
+        details: errorMessage 
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const firstName = searchParams.get("firstName");
+    const lastName = searchParams.get("lastName");
+
+    if (!firstName || !lastName) {
+      return NextResponse.json(
+        { error: "firstName and lastName are required" },
+        { status: 400 }
+      );
+    }
+
+    console.log(`🔍 Checking for existing member: ${firstName} ${lastName}`);
+    const db = await getDb();
+
+    const existingMember = await db.collection("members").findOne({
+      firstName: firstName,
+      lastName: lastName,
+    });
+
+    if (!existingMember) {
+      return NextResponse.json(
+        { exists: false },
+        { status: 200 }
+      );
+    }
+
+    console.log("✓ Found existing member:", existingMember._id.toString());
+    return NextResponse.json(
+      { 
+        exists: true,
+        member: {
+          ...existingMember,
+          _id: existingMember._id.toString()
+        }
+      },
+      { status: 200 }
+    );
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("✗ Error checking member:", errorMessage);
     
     return NextResponse.json(
       { 

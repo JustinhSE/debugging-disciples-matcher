@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         accountabilityLevel: match.accountabilityLevel,
         matchPreference: match.matchPreference,
         personalityWords: match.personalityWords || [],
-        hobbiesRaw: match.hobbiesRaw || [],
+        hobbiesRaw: match.hobbies || [],
         sportsTheyWatch: match.sportsTheyWatch || [],
         profile: match.profile || "",
         matchScore: match.matchScore,
