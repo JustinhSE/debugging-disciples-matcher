@@ -9,6 +9,8 @@ import { ArrowLeft, Heart, Users, Briefcase } from "lucide-react";
 
 interface MatchMember {
   _id: string;
+  firstName: string;
+  lastName: string;
   stage: string;
   major: string;
   institution: string;
@@ -16,6 +18,8 @@ interface MatchMember {
   accountabilityLevel: string;
   matchPreference: string;
   personalityWords: string[];
+  hobbiesRaw: string[];
+  sportsTheyWatch: string[];
   matchScore: number;
 }
 
@@ -131,11 +135,14 @@ export default function ResultsPage() {
                     </div>
                     <div>
                       <CardTitle className="text-xl text-white">
-                        {match.stage === "college"
-                          ? "College Student"
-                          : match.stage === "new_grad"
-                            ? "New Grad / Early Career"
-                            : match.stage}
+                        {match.firstName} {match.lastName}{" "}
+                        <span className="text-sm font-normal text-[#a1a1aa]">
+                          ({match.stage === "college"
+                            ? "College Student"
+                            : match.stage === "new_grad"
+                              ? "New Grad / Early Career"
+                              : match.stage})
+                        </span>
                       </CardTitle>
                       <CardDescription className="text-[#a1a1aa]">
                         {match.major} • {match.institution}
@@ -202,17 +209,44 @@ export default function ResultsPage() {
                       <div>
                         <h5 className="font-medium mb-2 flex items-center gap-2 text-white">
                           <Briefcase size={16} className="text-[#3b82f6]" />
-                          Mentorship
+                          Hobbies & Sports
                         </h5>
-                        <Badge className="bg-[#18181b] text-[#3b82f6] border border-[#3b82f6]">
-                          {match.matchPreference === "mentor"
-                            ? "Offers mentorship"
-                            : match.matchPreference === "mentee"
-                              ? "Seeks mentorship"
-                              : match.matchPreference === "peer"
-                                ? "Peer mentorship"
-                                : "Flexible"}
-                        </Badge>
+                        <div className="space-y-2">
+                          {match.hobbiesRaw.length > 0 && (
+                            <div>
+                              <p className="text-xs text-[#808080] mb-1">Hobbies:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {match.hobbiesRaw.slice(0, 2).map((hobby) => (
+                                  <Badge key={hobby} className="bg-[#18181b] text-[#3b82f6] border border-[#3b82f6] text-xs">
+                                    {hobby}
+                                  </Badge>
+                                ))}
+                                {match.hobbiesRaw.length > 2 && (
+                                  <Badge className="bg-[#27272a] text-[#a1a1aa] border border-[#27272a] text-xs">
+                                    +{match.hobbiesRaw.length - 2} more
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          {match.sportsTheyWatch.length > 0 && (
+                            <div>
+                              <p className="text-xs text-[#808080] mb-1">Sports:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {match.sportsTheyWatch.slice(0, 2).map((sport) => (
+                                  <Badge key={sport} className="bg-[#18181b] text-[#3b82f6] border border-[#3b82f6] text-xs">
+                                    {sport}
+                                  </Badge>
+                                ))}
+                                {match.sportsTheyWatch.length > 2 && (
+                                  <Badge className="bg-[#27272a] text-[#a1a1aa] border border-[#27272a] text-xs">
+                                    +{match.sportsTheyWatch.length - 2} more
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

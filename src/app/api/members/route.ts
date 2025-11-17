@@ -33,6 +33,8 @@ const onboardingSchema = z.object({
 
   hobbiesRaw: z.array(z.string()).default([]),
   sportsTheyWatch: z.array(z.string()).default([]),
+  
+  profile: z.string().default(""),
 });
 
 function timezoneToOffsetHours(tz: string): number {
@@ -108,6 +110,8 @@ export async function POST(req: Request) {
 
       hobbies: data.hobbiesRaw,
       sportsTheyWatch: data.sportsTheyWatch,
+      
+      profile: data.profile,
 
       createdAt: new Date(),
     };

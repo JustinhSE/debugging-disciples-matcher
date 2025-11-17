@@ -70,6 +70,8 @@ export async function GET(request: NextRequest) {
       .slice(0, 3)
       .map((match: any) => ({
         _id: match._id.toString(),
+        firstName: match.firstName,
+        lastName: match.lastName,
         stage: match.stage,
         major: match.major,
         institution: match.institution,
@@ -77,6 +79,8 @@ export async function GET(request: NextRequest) {
         accountabilityLevel: match.accountabilityLevel,
         matchPreference: match.matchPreference,
         personalityWords: match.personalityWords || [],
+        hobbiesRaw: match.hobbiesRaw || [],
+        sportsTheyWatch: match.sportsTheyWatch || [],
         matchScore: match.matchScore,
       }));
 
