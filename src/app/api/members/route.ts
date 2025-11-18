@@ -73,6 +73,8 @@ export async function POST(req: Request) {
     console.log("✓ Data validated");
 
     const data = parsed.data;
+    const firstName = data.firstName.trim();
+    const lastName = data.lastName.trim();
     const timezoneOffsetHours = timezoneToOffsetHours(data.timezone);
 
     console.log("🔗 Connecting to database...");
@@ -83,15 +85,15 @@ export async function POST(req: Request) {
     let profile = data.profile;
     try {
       const userMapping = await db.collection("user_mappings").findOne({
-        firstName: { $regex: `^${data.firstName}$`, $options: "i" },
-        lastName: { $regex: `^${data.lastName}$`, $options: "i" },
+        firstName: { $regex: `^${firstName}$`, $options: "i" },
+        lastName: { $regex: `^${lastName}$`, $options: "i" },
       });
 
       if (userMapping && userMapping.userid) {
         profile = `https://debuggingdisciples.slack.com/team/${userMapping.userid}`;
         console.log(`✓ Found userid: ${userMapping.userid}`);
       } else {
-        console.warn(`⚠ No userid found for ${data.firstName} ${data.lastName}`);
+        console.warn(`⚠ No userid found for ${firstName} ${lastName}`);
       }
     } catch (err) {
       console.warn(`⚠ Error looking up userid:`, err);
@@ -99,8 +101,8 @@ export async function POST(req: Request) {
     }
 
     const memberDoc = {
-      firstName: data.firstName,
-      lastName: data.lastName,
+      firstName: firstName,
+      lastName: lastName,
       
       stage: data.stage,
       major: data.major,
